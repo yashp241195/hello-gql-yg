@@ -1,3 +1,8 @@
+import { createPubSub } from "graphql-yoga"
+
+const pubSub = createPubSub()
+
+
 const UserTypes = `
 
     type Query{
@@ -6,10 +11,12 @@ const UserTypes = `
 
     type Mutation{
         add:String
+        sendMessage(msg:String):String
     }
 
     type Subscription{
         countdown(from: Int!): Int!
+        getMessage:String
     }
 
 `
@@ -19,7 +26,12 @@ const UserResolver = {
         hello:()=>"Hello World"
     },
     Mutation:{
-        add:()=>"Hey"
+        add:()=>"Hey",
+        sendMessage:(parents,args,{})=>{
+            const {msg} = args
+            pubSub.publish('randomNumber', msg+""+Math.random())
+            return msg
+        }
     },
     Subscription:{
         countdown:{
@@ -29,6 +41,10 @@ const UserResolver = {
                   yield { countdown: i }
                 }
               }
+        },
+        getMessage:{
+            subscribe: () => pubSub.subscribe('randomNumber'),
+            resolve: (payload) => payload
         }
     }
 
