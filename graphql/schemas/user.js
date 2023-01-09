@@ -23,7 +23,11 @@ const UserTypes = `
 const UserResolver = {
 
     Query:{
-        hello:()=>"Hello World"
+        hello:(parents,args,{req,res})=>{
+            let refreshExpTime = 30
+            res.cookie("myCook","token11",{ httpOnly:true, secure:true, maxAge:1000*refreshExpTime })
+            return "Hello World"
+        }
     },
     Mutation:{
         add:()=>"Hey",
